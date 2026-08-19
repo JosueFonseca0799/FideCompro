@@ -1,0 +1,28 @@
+# Compilación
+target/
+*.class
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+.nb-gradle/
+build/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Archivos temporales
+*.log
+*.tmp
+.DS_Store
+
+# Sistema operativo
+Thumbs.dbtarget/
+*.dat
