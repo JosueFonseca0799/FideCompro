@@ -30,6 +30,10 @@ public class Factura implements Serializable {
     public String getNumeroFactura() {
         return numeroFactura;
     }
+    
+    public LocalDateTime getFecha() {
+    return fecha;
+    }
 
     public Cliente getCliente() {
         return cliente;
