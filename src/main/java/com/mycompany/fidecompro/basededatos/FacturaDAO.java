@@ -1,8 +1,6 @@
 package com.mycompany.fidecompro.basededatos;
 
 import com.mycompany.fidecompro.Factura;
-import com.mycompany.fidecompro.LineaFactura;
-import com.mycompany.fidecompro.Producto;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,9 +30,20 @@ public class FacturaDAO {
                 java.sql.Timestamp.valueOf(factura.getFecha())
             );
 
-            sentencia.setString(3, factura.getCliente().getId());
-            sentencia.setString(4, factura.getUsuario().getId());
-            sentencia.setString(5, factura.getEstado());
+            sentencia.setString(
+                3,
+                factura.getCliente().getId()
+            );
+
+            sentencia.setString(
+                4,
+                factura.getUsuario().getId()
+            );
+
+            sentencia.setString(
+                5,
+                factura.getEstado()
+            );
 
             sentencia.executeUpdate();
         }
@@ -87,6 +96,24 @@ public class FacturaDAO {
             try (ResultSet resultado = sentencia.executeQuery()) {
                 return resultado.next();
             }
+        }
+    }
+
+    public void actualizarEstado(
+            String numeroFactura,
+            String estado) throws SQLException {
+
+        String sql = "UPDATE FACTURAS "
+                   + "SET ESTADO = ? "
+                   + "WHERE NUMERO_FACTURA = ?";
+
+        try (Connection conexion = ConexionBD.obtenerConexion();
+             PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+
+            sentencia.setString(1, estado);
+            sentencia.setString(2, numeroFactura);
+
+            sentencia.executeUpdate();
         }
     }
 }

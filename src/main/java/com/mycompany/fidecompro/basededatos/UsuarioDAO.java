@@ -43,4 +43,34 @@ public class UsuarioDAO {
 
         return null;
     }
+        
+        public Usuario buscarPorId(String id) throws SQLException {
+
+            String sql = "SELECT ID, NOMBRE, USERNAME, PASSWORD, ROL, ACTIVO "
+                       + "FROM USUARIOS "
+                       + "WHERE ID = ?";
+
+            try (Connection conexion = ConexionBD.obtenerConexion();
+                 PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+
+                sentencia.setString(1, id);
+
+                try (ResultSet resultado = sentencia.executeQuery()) {
+
+                    if (resultado.next()) {
+
+                        return new Usuario(
+                            resultado.getString("ID"),
+                            resultado.getString("NOMBRE"),
+                            resultado.getString("USERNAME"),
+                            resultado.getString("PASSWORD"),
+                            resultado.getString("ROL"),
+                            resultado.getBoolean("ACTIVO")
+                        );
+                    }
+                }
+            }
+
+            return null;
+        }
 }

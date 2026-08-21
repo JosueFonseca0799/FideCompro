@@ -62,4 +62,34 @@ public class ClienteDAO {
 
         return null;
     }
+    
+    public Cliente buscarPorId(String id) throws SQLException {
+
+        String sql = "SELECT ID, NOMBRE, CEDULA, TELEFONO, EMAIL, DIRECCION "
+                   + "FROM CLIENTES "
+                   + "WHERE ID = ?";
+
+        try (Connection conexion = ConexionBD.obtenerConexion();
+             PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+
+            sentencia.setString(1, id);
+
+            try (ResultSet resultado = sentencia.executeQuery()) {
+
+                if (resultado.next()) {
+
+                    return new Cliente(
+                        resultado.getString("ID"),
+                        resultado.getString("NOMBRE"),
+                        resultado.getString("CEDULA"),
+                        resultado.getString("TELEFONO"),
+                        resultado.getString("EMAIL"),
+                        resultado.getString("DIRECCION")
+                    );
+                }
+            }
+        }
+
+        return null;
+    }
 }

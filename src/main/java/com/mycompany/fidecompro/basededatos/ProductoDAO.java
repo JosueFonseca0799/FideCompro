@@ -14,30 +14,39 @@ import java.sql.SQLException;
  *
  * @author j.fonseca
  */
-
 public class ProductoDAO {
-    
+
     public void insertar(Producto producto) throws SQLException {
 
         String sql = "INSERT INTO PRODUCTOS "
-                   + "(CODIGO, NOMBRE, PRECIO_UNITARIO, STOCK, TIPO, PORCENTAJE_IMPUESTO) "
-                   + "VALUES (?, ?, ?, ?, ?, ?)";
+                + "(CODIGO, NOMBRE, PRECIO_UNITARIO, STOCK, TIPO, PORCENTAJE_IMPUESTO) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (Connection conexion = ConexionBD.obtenerConexion();
-             PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+        try (Connection conexion = ConexionBD.obtenerConexion(); PreparedStatement sentencia = conexion.prepareStatement(sql)) {
 
             sentencia.setString(1, producto.getCodigo());
             sentencia.setString(2, producto.getNombre());
-            sentencia.setBigDecimal(3, BigDecimal.valueOf(producto.getPrecioUnitario()));
+
+            sentencia.setBigDecimal(
+                    3,
+                    BigDecimal.valueOf(producto.getPrecioUnitario())
+            );
+
             sentencia.setInt(4, producto.getStock());
 
             if (producto instanceof ProductoGravado) {
+
                 sentencia.setString(5, "GRAVADO");
+
                 sentencia.setBigDecimal(
-                    6,
-                    BigDecimal.valueOf(((ProductoGravado) producto).getPorcentajeImpuesto())
+                        6,
+                        BigDecimal.valueOf(
+                                ((ProductoGravado) producto).getPorcentajeImpuesto()
+                        )
                 );
+
             } else {
+
                 sentencia.setString(5, "EXENTO");
                 sentencia.setBigDecimal(6, BigDecimal.ZERO);
             }
@@ -49,12 +58,11 @@ public class ProductoDAO {
     public Producto buscarPorCodigo(String codigo) throws SQLException {
 
         String sql = "SELECT CODIGO, NOMBRE, PRECIO_UNITARIO, STOCK, "
-                   + "TIPO, PORCENTAJE_IMPUESTO "
-                   + "FROM PRODUCTOS "
-                   + "WHERE CODIGO = ?";
+                + "TIPO, PORCENTAJE_IMPUESTO "
+                + "FROM PRODUCTOS "
+                + "WHERE CODIGO = ?";
 
-        try (Connection conexion = ConexionBD.obtenerConexion();
-             PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+        try (Connection conexion = ConexionBD.obtenerConexion(); PreparedStatement sentencia = conexion.prepareStatement(sql)) {
 
             sentencia.setString(1, codigo);
 
@@ -62,34 +70,47 @@ public class ProductoDAO {
 
                 if (resultado.next()) {
 
-                    String tipo = resultado.getString("TIPO");
+                    String tipo
+                            = resultado.getString("TIPO");
 
-                    String codigoProducto = resultado.getString("CODIGO");
-                    String nombre = resultado.getString("NOMBRE");
-                    double precio = resultado.getBigDecimal("PRECIO_UNITARIO").doubleValue();
-                    int stock = resultado.getInt("STOCK");
+                    String codigoProducto
+                            = resultado.getString("CODIGO");
+
+                    String nombre
+                            = resultado.getString("NOMBRE");
+
+                    double precio
+                            = resultado
+                                    .getBigDecimal("PRECIO_UNITARIO")
+                                    .doubleValue();
+
+                    int stock
+                            = resultado.getInt("STOCK");
 
                     if ("GRAVADO".equals(tipo)) {
 
-                        double porcentaje = resultado
-                                .getBigDecimal("PORCENTAJE_IMPUESTO")
-                                .doubleValue();
+                        double porcentaje
+                                = resultado
+                                        .getBigDecimal(
+                                                "PORCENTAJE_IMPUESTO"
+                                        )
+                                        .doubleValue();
 
                         return new ProductoGravado(
-                            codigoProducto,
-                            nombre,
-                            precio,
-                            stock,
-                            porcentaje
+                                codigoProducto,
+                                nombre,
+                                precio,
+                                stock,
+                                porcentaje
                         );
 
                     } else {
 
                         return new ProductoExento(
-                            codigoProducto,
-                            nombre,
-                            precio,
-                            stock
+                                codigoProducto,
+                                nombre,
+                                precio,
+                                stock
                         );
                     }
                 }
@@ -97,5 +118,32 @@ public class ProductoDAO {
         }
 
         return null;
+    }
+
+    public void actualizarStock(
+            String codigo,
+            int cantidad) throws SQLException {
+
+        String sql = "UPDATE PRODUCTOS "
+                + "SET STOCK = STOCK - ? "
+                + "WHERE CODIGO = ? "
+                + "AND STOCK >= ?";
+
+        try (Connection conexion = ConexionBD.obtenerConexion(); PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+
+            sentencia.setInt(1, cantidad);
+            sentencia.setString(2, codigo);
+            sentencia.setInt(3, cantidad);
+
+            int filasActualizadas
+                    = sentencia.executeUpdate();
+
+            if (filasActualizadas == 0) {
+
+                throw new SQLException(
+                        "Stock insuficiente o producto inexistente."
+                );
+            }
+        }
     }
 }
